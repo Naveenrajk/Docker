@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+    db:
+      image: mysql:latest
+      container_name: mysql-db  
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+      ports:
+        - "3307:3307"
+      restart: always
+
+    backend:
+        image: demo
+        container_name: demo
+        build:
+            context: ./demo
+        ports:
+            - "80:80"
+
+        extra_hosts:
+            - "host.docker.internal:80"
+
+        depends_on:                           #define dependencies of this app
+            - db                                #dependency name (which is defined with this name 'db' in this file earlier)
+        environment:
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3307/property?createDatabaseIfNotExist=true
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+
+    frontend:
+        image: demo-ui
+        container_name: demo-ui
+        build:
+            context: ./my-demo-ui
+        ports:
+            - "4200:80"
+        depends_on:
+            - backend
